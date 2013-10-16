@@ -82,22 +82,20 @@ dataList = []
 for eachMXD in mxdList:
     try:
         mxd = arcpy.mapping.MapDocument(str(eachMXD))
+
+        layers = arcpy.mapping.ListLayers(mxd)
+        for layer in layers:
+            dataSauce = layer.dataSource
+            dataSauceShrt = dataSauce.rsplit('\\',1)[0]
+            dataSauceShort = dataSauceShrt.replace('\\\\GEOTHERMAL\\','C:\\')
+            dataSauces.add(str(dataSauceShort))
     except:
         print "Invalid file name: "+ str(eachMXD)
-        mxdList.remove(eachMXD)
-        continue
-    layers = arcpy.mapping.ListLayers(mxd)
-    for layer in layers:
-        dataSauce = layer.dataSource
-        dataSauceShort = dataSauce.rsplit('\\',1)[0]
-        dataSauceShort = dataSauceShort.replace('\\\\GEOTHERMAL\\','C:\\')
-        #dataList.append(str(dataSauce))
-        dataSauces.add(str(dataSauceShort))
 
 #At this point we have a list of MXDs and sources that we need to keep in place
 
 #Now let's use a Recursive_Glob to create a list of all file paths in our service directory
-#First the mdb and gdb files
+
 path = 'C:\\datafiles\\aasggeothermal\\' #your starting directory here
 allList = []
 findThis = ['pass']#in order to start the while loop
@@ -105,28 +103,25 @@ search_params = '.gdb' #file extension etc.
 while len(findThis) > 0: #While a downward search still produces results
     findThis = glob.glob(path)
     for item in findThis:
-        if item.endswith(search_params) or item.endswith('.mdb') == True: #Just eliminate the 'if' to return all paths
-            allList.append(item)
-    path = path + '\\*'
-
-#Now let's find MXD files.  We can add it to the same list, they'll be sorted out later
-path = 'C:\\datafiles\\aasggeothermal\\'
-findThis = ['pass']#in order to start the while loop
-search_params = '.mxd' #file extension etc.
-while len(findThis) > 0: #While a downward search still produces results
-    findThis = glob.glob(path)
-    for item in findThis:
-        if item.endswith(search_params) == True: #Just eliminate the 'if' to return all paths
+        if item.endswith(search_params) or item.endswith('.mdb')or item.endswith('.mxd') == True:
             allList.append(item)
     path = path + '\\*'
 
 #Now that we have our super list, we need to remove the our necessary files from this list.
 
 for sauce in dataSauces:
-    try:
+    if sauce.endswith('INAqueousChemistry1_10.gdb'): print "hey i found " + sauce
+    '''try:
         allList.remove(sauce)
     except:
-        print "Was not in list: " + sauce
+        print "Was not in list: " + sauce'''
+    for e in allList:
+        tempLow = e.lower()
+        if tempLow == sauce.lower():
+                try:
+                    allList.remove(e)
+                except:
+                    print "Was not in list: " + sauce
 
 for mxd in mxdList:
     try:
@@ -167,7 +162,7 @@ for each in allList:
         path = fullPath
         a, b = path.rsplit('.',1)
         if i > 1:
-            path = a[:-1]+ str(i) +'.'+ b
+            path = a[:-1]+ str(i) +'.'+ b #if number already added, remove number and replace with new (gets buggy after 9)
         else:
             path = a + str(i) +'.'+ b
         fullPath = path
