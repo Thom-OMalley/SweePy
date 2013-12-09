@@ -110,11 +110,6 @@ while len(findThis) > 0: #While a downward search still produces results
 #Now that we have our super list, we need to remove the our necessary files from this list.
 
 for sauce in dataSauces:
-    if sauce.endswith('INAqueousChemistry1_10.gdb'): print "hey i found " + sauce
-    '''try:
-        allList.remove(sauce)
-    except:
-        print "Was not in list: " + sauce'''
     for e in allList:
         tempLow = e.lower()
         if tempLow == sauce.lower():
